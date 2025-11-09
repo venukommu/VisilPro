@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info:
+  title: Dispatch Agent API
+  version: 0.1.0
+  description: Minimal API for operational health checks
+paths:
+  /health:
+    get:
+      summary: Service health
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: UP
+                  reason:
+                    type: string
+                    nullable: true
+                  metadata:
+                    type: object
+                    nullable: true
+        '500':
+          description: Unhealthy / degraded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: DOWN
+                  reason:
+                    type: string
+                    example: "Database unreachable"
