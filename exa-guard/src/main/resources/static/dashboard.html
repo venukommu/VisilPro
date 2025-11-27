@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VigilPro - Proctor Dashboard</title>
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            min-height: 100vh;
+        }
+        h1 { 
+            color: #fff; 
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .input-group {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        input {
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            flex-grow: 0;
+            width: 300px;
+            color: #fff;
+            font-size: 16px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 10px rgba(79, 172, 254, 0.3);
+        }
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            margin-top: 10px;
+        }
+        th {
+            text-align: left;
+            padding: 15px;
+            color: #a0a0a0;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        td {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        td:first-child {
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        td:last-child {
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .badge-danger { 
+            background: rgba(255, 107, 107, 0.2); 
+            color: #ff6b6b; 
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        .badge-warning { 
+            background: rgba(252, 163, 17, 0.2); 
+            color: #fca311; 
+            border: 1px solid rgba(252, 163, 17, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Proctor Dashboard</h1>
+        <div class="input-group">
+            <input type="number" id="sessionId" placeholder="Enter Session ID to Monitor">
+            <button onclick="startMonitoring()">Monitor</button>
+        </div>
+
+        <div id="activeSessions" style="margin-bottom: 30px; background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+            <h3 style="margin-top: 0; color: #4facfe;">Active Sessions</h3>
+            <div id="sessionList" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <p style="color: #aaa;">Loading sessions...</p>
+            </div>
+        </div>
+        
+        <table id="eventsTable">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Confidence</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Events will appear here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let monitoringInterval = null;
+
+        // Fetch sessions on load
+        fetchSessions();
+        setInterval(fetchSessions, 5000); // Refresh list every 5s
+
+        async function fetchSessions() {
+            try {
+                const response = await fetch('/api/exam/sessions');
+                const sessions = await response.json();
+                const list = document.getElementById('sessionList');
+                list.innerHTML = '';
+
+                if (sessions.length === 0) {
+                    list.innerHTML = '<p style="color: #aaa;">No active sessions found.</p>';
+                    return;
+                }
+
+                sessions.reverse().forEach(session => {
+                    const card = document.createElement('div');
+                    card.style.padding = '10px 15px';
+                    card.style.background = 'rgba(255, 255, 255, 0.1)';
+                    card.style.borderRadius = '8px';
+                    card.style.cursor = 'pointer';
+                    card.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                    card.style.transition = 'all 0.2s';
+                    card.onmouseover = () => card.style.background = 'rgba(79, 172, 254, 0.2)';
+                    card.onmouseout = () => card.style.background = 'rgba(255, 255, 255, 0.1)';
+                    card.onclick = () => {
+                        document.getElementById('sessionId').value = session.id;
+                        startMonitoring();
+                    };
+
+                    card.innerHTML = `
+                        <div style="font-weight: bold; color: #fff;">Session #${session.id}</div>
+                        <div style="font-size: 12px; color: #ccc;">Student: ${session.studentId}</div>
+                        <div style="font-size: 12px; color: #4facfe;">${session.status}</div>
+                    `;
+                    list.appendChild(card);
+                });
+            } catch (err) {
+                console.error("Error fetching sessions:", err);
+            }
+        }
+
+        function startMonitoring() {
+            const sessionId = document.getElementById('sessionId').value;
+            if (!sessionId) return alert("Please enter a Session ID");
+
+            if (monitoringInterval) clearInterval(monitoringInterval);
+            
+            fetchEvents(sessionId);
+            monitoringInterval = setInterval(() => fetchEvents(sessionId), 2000);
+        }
+
+        async function fetchEvents(sessionId) {
+            try {
+                const response = await fetch(`/api/exam/events/${sessionId}`);
+                const events = await response.json();
+                updateTable(events);
+            } catch (err) {
+                console.error("Error fetching events:", err);
+            }
+        }
+
+        function updateTable(events) {
+            const tbody = document.querySelector('#eventsTable tbody');
+            tbody.innerHTML = '';
+            
+            events.reverse().forEach(event => {
+                const row = document.createElement('tr');
+                const time = new Date(event.timestamp).toLocaleTimeString();
+                let badgeClass = 'badge-warning';
+                if (event.type === 'MULTIPLE_FACES' || event.type === 'FACE_NOT_VISIBLE') badgeClass = 'badge-danger';
+
+                row.innerHTML = `
+                    <td>${time}</td>
+                    <td><span class="badge ${badgeClass}">${event.type}</span></td>
+                    <td>${(event.confidenceScore * 100).toFixed(0)}%</td>
+                    <td>${event.snapshotUrl}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
