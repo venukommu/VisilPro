@@ -1,6 +1,6 @@
-package com.exaguard.repository;
+package com.visilpro.repository;
 
-import com.exaguard.model.ExamSession;
+import com.visilpro.model.ExamSession;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

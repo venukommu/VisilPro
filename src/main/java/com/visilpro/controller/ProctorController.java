@@ -1,9 +1,9 @@
-package com.exaguard.controller;
+package com.visilpro.controller;
 
-import com.exaguard.model.ExamSession;
-import com.exaguard.model.MalpracticeEvent;
-import com.exaguard.repository.ExamSessionRepository;
-import com.exaguard.repository.MalpracticeEventRepository;
+import com.visilpro.model.ExamSession;
+import com.visilpro.model.MalpracticeEvent;
+import com.visilpro.repository.ExamSessionRepository;
+import com.visilpro.repository.MalpracticeEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

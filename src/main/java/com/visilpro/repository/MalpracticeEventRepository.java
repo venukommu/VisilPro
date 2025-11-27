@@ -1,6 +1,6 @@
-package com.exaguard.repository;
+package com.visilpro.repository;
 
-import com.exaguard.model.MalpracticeEvent;
+import com.visilpro.model.MalpracticeEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;

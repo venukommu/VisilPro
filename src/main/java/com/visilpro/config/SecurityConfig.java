@@ -1,4 +1,4 @@
-package com.exaguard.config;
+package com.visilpro.config;
 
 
 import org.springframework.context.annotation.Bean;
