@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VigilPro - Exam Session</title>
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+        }
+        #sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        #main-content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        #split-view {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        #video-section {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #video-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #form-section {
+            flex: 1;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            height: 100%;
+            box-sizing: border-box;
+        }
+        h2, h3 {
+            color: #fff;
+        }
+        .status-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+            color: #fff;
+        }
+        .alert {
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(255, 0, 0, 0.15);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 8px;
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+        #timer {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #4facfe;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+        }
+        /* Form Elements */
+        label {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        label:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        textarea, input[type="email"] {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 6px;
+        }
+        textarea:focus, input[type="email"]:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 10px rgba(79, 172, 254, 0.3);
+        }
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h2>VigilPro</h2>
+        <div class="status-box">
+            <strong>Student ID:</strong> <span id="displayStudentId">Loading...</span><br>
+            <strong>Session ID:</strong> <span id="displaySessionId" style="color: #4facfe;">Waiting...</span><br>
+            <strong>Status:</strong> <span id="connectionStatus">Monitoring Active</span>
+        </div>
+        <div id="malpracticeAlert" class="alert">
+            <strong>⚠️ Warning:</strong> <span id="alertMessage">Suspicious behavior detected!</span>
+        </div>
+        <div id="warningLog" style="margin-top: 20px; flex-grow: 1; overflow-y: auto; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 10px; margin-bottom: 10px;">
+            <h3 style="font-size: 16px; margin-top: 0;">Activity Log</h3>
+            <ul id="warningList" style="list-style-type: none; padding: 0; font-size: 12px; color: #ff6b6b;">
+            </ul>
+        </div>
+        <div style="margin-top: auto;">
+            <button onclick="endExam()" style="width: 100%; padding: 10px; background-color: #d93025; color: white; border: none; border-radius: 4px; cursor: pointer;">Submit Exam</button>
+        </div>
+    </div>
+    <div id="main-content">
+        <div id="timer">Time Remaining: 10:00</div>
+        
+        <div id="split-view">
+            <!-- Left Side: Camera -->
+            <div id="video-section">
+                <div id="video-container">
+                    <video id="video" autoplay muted></video>
+                    <!-- Canvas for drawing face detections -->
+                </div>
+            </div>
+
+            <!-- Right Side: Form -->
+            <div id="form-section">
+                <h2 style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px; margin-top: 0;">General Assessment</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <h3>1. Which of the following is NOT a Java keyword?</h3>
+                    <label style="display: block; margin: 5px 0;"><input type="radio" name="q1" value="a"> static</label>
+                    <label style="display: block; margin: 5px 0;"><input type="radio" name="q1" value="b"> boolean</label>
+                    <label style="display: block; margin: 5px 0;"><input type="radio" name="q1" value="c"> void</label>
+                    <label style="display: block; margin: 5px 0;"><input type="radio" name="q1" value="d"> integer</label>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3>2. What is the time complexity of binary search?</h3>
+                    <label style="display: block; margin: 5px 0;"><input type="radio" name="q2" value="a"> O(n)</label>
+                    <label style="display: block; margin: 5px 0;"><input type="radio" name="q2" value="b"> O(log n)</label>
+                    <label style="display: block; margin: 5px 0;"><input type="radio" name="q2" value="c"> O(n^2)</label>
+                    <label style="display: block; margin: 5px 0;"><input type="radio" name="q2" value="d"> O(1)</label>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3>3. Describe the principle of Encapsulation.</h3>
+                    <textarea style="width: 100%; height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Type your answer here..."></textarea>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3>4. Enter your Email Address for results:</h3>
+                    <input type="email" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="student@example.com">
+                </div>
+                
+                <!-- Extra content to demonstrate scrolling if needed -->
+                <div style="margin-bottom: 20px;">
+                    <h3>5. Additional Comments:</h3>
+                    <textarea style="width: 100%; height: 60px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load face-api.js (we will download this later) -->
+    <script src="js/face-api.min.js"></script>
+    <script>
+        const video = document.getElementById('video');
+        const videoContainer = document.getElementById('video-container');
+        const studentId = localStorage.getItem('studentId') || 'Unknown';
+        document.getElementById('displayStudentId').innerText = studentId;
+        
+        let examSessionId = null;
+        let isExamActive = true;
+
+        // Start Exam Session
+        async function startExamSession() {
+            try {
+                const response = await fetch('/api/exam/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ studentId: studentId, examCode: 'EXAM-001' })
+                });
+                const session = await response.json();
+                examSessionId = session.id;
+                document.getElementById('displaySessionId').innerText = examSessionId;
+                console.log("Exam Session Started:", examSessionId);
+            } catch (err) {
+                console.error("Failed to start session:", err);
+            }
+        }
+
+        // Load Models
+        Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('/models')
+        ]).then(startVideo);
+
+        async function startVideo() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: {}, audio: true });
+                video.srcObject = stream;
+                
+                // Audio Context Setup
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const microphone = audioContext.createMediaStreamSource(stream);
+                const analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                microphone.connect(analyser);
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+                // Audio Detection Loop
+                setInterval(() => {
+                    if (!isExamActive) return;
+                    analyser.getByteFrequencyData(dataArray);
+                    const volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                    
+                    if (volume > 50) { // Threshold for loud noise
+                        handleMalpractice("AUDIO_DETECTED", "Suspicious audio detected.");
+                    }
+                }, 1000);
+
+                await startExamSession();
+            } catch (err) {
+                console.error("Error accessing webcam/microphone:", err);
+                alert("Please enable webcam and microphone access to continue.");
+            }
+        }
+
+        video.addEventListener('play', () => {
+            const canvas = faceapi.createCanvasFromMedia(video);
+            videoContainer.append(canvas);
+            const displaySize = { width: videoContainer.clientWidth, height: videoContainer.clientHeight };
+            faceapi.matchDimensions(canvas, displaySize);
+
+            let missingFaceFrames = 0;
+
+            setInterval(async () => {
+                if (!isExamActive) return;
+
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                faceapi.draw.drawDetections(canvas, resizedDetections);
+                // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+
+                // Malpractice Detection Logic
+                if (detections.length === 0) {
+                    missingFaceFrames++;
+                    if (missingFaceFrames >= 3) {
+                        handleMalpractice("FACE_NOT_VISIBLE", "No face detected in frame.");
+                    }
+                } else {
+                    missingFaceFrames = 0; // Reset counter if face is found
+                    
+                    if (detections.length > 1) {
+                        handleMalpractice("MULTIPLE_FACES", "Multiple faces detected.");
+                    } else {
+                        // Gaze/Head Pose Estimation (Simplified)
+                        const landmarks = detections[0].landmarks;
+                        const nose = landmarks.getNose()[0];
+                        const leftEye = landmarks.getLeftEye()[0];
+                        const rightEye = landmarks.getRightEye()[0];
+                        
+                        // Simple logic: if nose is too far left or right relative to eyes
+                        // This is a rough approximation for looking away
+                        const eyeCenter = (leftEye.x + rightEye.x) / 2;
+                        const deviation = Math.abs(nose.x - eyeCenter);
+                        
+                        if (deviation > 40) { // Threshold needs tuning
+                            handleMalpractice("LOOKING_AWAY", "Student looking away.");
+                        }
+                    }
+                }
+            }, 1000); // Check every second
+        });
+
+        // Tab Switching / Focus Lost Detection
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && isExamActive) {
+                handleMalpractice("FOCUS_LOST", "Student switched tabs or minimized window.");
+            }
+        });
+
+        let lastAlertTime = 0;
+        async function handleMalpractice(type, message) {
+            const now = Date.now();
+            if (now - lastAlertTime < 5000) return; // Debounce alerts (5 seconds)
+
+            lastAlertTime = now;
+            
+            // Show UI Alert
+            const alertBox = document.getElementById('malpracticeAlert');
+            document.getElementById('alertMessage').innerText = message;
+            alertBox.style.display = 'block';
+            setTimeout(() => alertBox.style.display = 'none', 3000);
+
+            // Add to persistent log
+            const logList = document.getElementById('warningList');
+            const entry = document.createElement('li');
+            entry.style.marginBottom = '5px';
+            entry.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+            entry.style.paddingBottom = '2px';
+            entry.innerText = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logList.prepend(entry);
+
+            // Log to Backend
+            if (examSessionId) {
+                try {
+                    await fetch('/api/exam/log', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sessionId: examSessionId,
+                            type: type,
+                            confidenceScore: 0.95,
+                            snapshotUrl: "snapshot_placeholder.jpg" // In real app, send base64 image
+                        })
+                    });
+                    console.log("Malpractice logged:", type);
+                } catch (err) {
+                    console.error("Failed to log malpractice:", err);
+                }
+            }
+        }
+
+        function endExam() {
+            isExamActive = false;
+            alert("Exam Submitted!");
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
