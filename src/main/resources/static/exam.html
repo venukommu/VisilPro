@@ -549,9 +549,16 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <script src="js/face-api.min.js"></script>
+    <script>
+        // Expose face-api's tf for coco-ssd to avoid version conflicts
+        if (typeof faceapi !== 'undefined' && faceapi.tf) {
+            window.tf = faceapi.tf;
+            console.log("Aliased faceapi.tf to window.tf");
+        }
+    </script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2"></script>
     <script>
         const video = document.getElementById('video');
         const videoContainer = document.getElementById('video-container');
@@ -580,19 +587,56 @@
 
         // Load Models
         let objectDetector;
-        Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-            faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-            cocoSsd.load().then(model => {
-                objectDetector = model;
-                console.log("Object Detector Loaded");
-            })
-        ]).then(startVideo);
+        console.log("Starting model loading...");
+        
+        if (typeof faceapi === 'undefined') {
+            console.error("face-api.js not loaded!");
+            alert("Critical Error: AI Library not loaded.");
+        } else {
+            loadModels();
+        }
+
+        async function loadModels() {
+            try {
+                console.log("Loading TinyFaceDetector...");
+                await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+                console.log("TinyFaceDetector loaded.");
+            } catch (e) {
+                console.error("Failed to load TinyFaceDetector:", e);
+                alert("Failed to load Face Detector model.");
+                return;
+            }
+
+            try {
+                console.log("Loading FaceLandmark68Net...");
+                await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+                console.log("FaceLandmark68Net loaded.");
+            } catch (e) {
+                console.error("Failed to load FaceLandmark68Net:", e);
+                alert("Failed to load Face Landmark model.");
+                return;
+            }
+
+            try {
+                console.log("Loading COCO-SSD...");
+                objectDetector = await cocoSsd.load();
+                console.log("COCO-SSD loaded.");
+            } catch (e) {
+                console.error("Failed to load COCO-SSD:", e);
+                alert("Failed to load Object Detection model (COCO-SSD).");
+                // Continue without object detection if this fails
+            }
+
+            console.log("All available models loaded.");
+            startVideo();
+        }
 
         async function startVideo() {
+            console.log("Starting video stream...");
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: {}, audio: true });
                 video.srcObject = stream;
+                console.log("Video stream active");
                 
                 // Audio Context Setup
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -629,14 +673,25 @@
             let missingFaceFrames = 0;
             let mouthOpenFrames = 0;
 
+            let loopCount = 0;
             // Face & Mouth Detection Loop
             setInterval(async () => {
                 if (!isExamActive) return;
+                loopCount++;
 
-                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
+                // Lower threshold to 0.3 for better sensitivity (detects covered faces/side profiles better)
+                const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.3 });
+                const detections = await faceapi.detectAllFaces(video, options).withFaceLandmarks();
+                
+                if (loopCount % 10 === 0) {
+                    console.log(`Detection Loop: Found ${detections.length} faces`);
+                }
+
                 const resizedDetections = faceapi.resizeResults(detections, displaySize);
                 
                 canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw detections for ALL faces to show what is being tracked
                 faceapi.draw.drawDetections(canvas, resizedDetections);
                 // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
 
