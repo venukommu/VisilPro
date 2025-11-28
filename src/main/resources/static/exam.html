@@ -549,6 +549,8 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <script src="js/face-api.min.js"></script>
     <script>
         const video = document.getElementById('video');
@@ -577,9 +579,14 @@
         }
 
         // Load Models
+        let objectDetector;
         Promise.all([
             faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-            faceapi.nets.faceLandmark68Net.loadFromUri('/models')
+            faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+            cocoSsd.load().then(model => {
+                objectDetector = model;
+                console.log("Object Detector Loaded");
+            })
         ]).then(startVideo);
 
         async function startVideo() {
@@ -620,7 +627,9 @@
             faceapi.matchDimensions(canvas, displaySize);
 
             let missingFaceFrames = 0;
+            let mouthOpenFrames = 0;
 
+            // Face & Mouth Detection Loop
             setInterval(async () => {
                 if (!isExamActive) return;
 
@@ -650,16 +659,56 @@
                         const rightEye = landmarks.getRightEye()[0];
                         
                         // Simple logic: if nose is too far left or right relative to eyes
-                        // This is a rough approximation for looking away
                         const eyeCenter = (leftEye.x + rightEye.x) / 2;
                         const deviation = Math.abs(nose.x - eyeCenter);
                         
-                        if (deviation > 40) { // Threshold needs tuning
+                        if (deviation > 40) { 
                             handleMalpractice("LOOKING_AWAY", "Student looking away.");
+                        }
+
+                        // Mouth Open Detection
+                        const mouth = landmarks.getMouth();
+                        // Points 62 (top lip bottom) and 66 (bottom lip top) are inner mouth points in 68-point model
+                        // But face-api landmarks might be 0-indexed. 
+                        // Outer lip: 48-59, Inner lip: 60-67.
+                        // Top inner: 62, Bottom inner: 66.
+                        const topLip = mouth[14]; // Point 62
+                        const bottomLip = mouth[18]; // Point 66
+                        
+                        const mouthDistance = Math.abs(bottomLip.y - topLip.y);
+                        // Normalize by face size (e.g., distance between eyes)
+                        const faceScale = Math.abs(leftEye.x - rightEye.x);
+                        
+                        // Threshold: if mouth opening is > 10% of eye distance
+                        if (mouthDistance / faceScale > 0.15) {
+                            mouthOpenFrames++;
+                            if (mouthOpenFrames > 5) { // Sustained for ~5 checks
+                                handleMalpractice("SUSPICIOUS_TALKING", "Suspicious talking detected.");
+                            }
+                        } else {
+                            mouthOpenFrames = 0;
                         }
                     }
                 }
-            }, 1000); // Check every second
+            }, 500); // Check every 500ms
+
+            // Object Detection Loop (Slower, every 2s)
+            setInterval(async () => {
+                if (!isExamActive || !objectDetector) return;
+
+                const predictions = await objectDetector.detect(video);
+                predictions.forEach(prediction => {
+                    const class_name = prediction.class.toLowerCase();
+                    if (class_name === 'cell phone' || class_name === 'mobile phone') {
+                        handleMalpractice("PROHIBITED_OBJECT", "Mobile phone detected!");
+                        // Draw bounding box
+                        const ctx = canvas.getContext('2d');
+                        ctx.strokeStyle = 'red';
+                        ctx.lineWidth = 4;
+                        ctx.strokeRect(prediction.bbox[0], prediction.bbox[1], prediction.bbox[2], prediction.bbox[3]);
+                    }
+                });
+            }, 2000);
         });
 
         // Tab Switching / Focus Lost Detection
