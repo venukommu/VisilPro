@@ -3,185 +3,396 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VigilPro - Proctor Dashboard</title>
+    <title>VisilPro - Proctor Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --bg-color: #0f172a;
+            --sidebar-bg: #1e293b;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --success-color: #10b981;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: #fff;
-            min-height: 100vh;
+            padding: 0;
         }
-        h1 { 
-            color: #fff; 
-            text-align: center;
-            margin-bottom: 30px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-        .input-group {
-            margin-bottom: 30px;
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
             display: flex;
-            gap: 15px;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 40px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
             justify-content: center;
+            gap: 8px;
         }
-        input {
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        .brand span { color: var(--accent-color); }
+
+        .nav-item {
+            padding: 12px 16px;
             border-radius: 8px;
-            flex-grow: 0;
-            width: 300px;
-            color: #fff;
-            font-size: 16px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-color);
+        }
+
+        /* Main Content */
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            height: 64px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .content-area {
+            flex-grow: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        /* Dashboard Components */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 24px;
+            height: 100%;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Monitoring Input */
+        .monitor-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        input {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
         input:focus {
             outline: none;
-            border-color: #4facfe;
-            box-shadow: 0 0 10px rgba(79, 172, 254, 0.3);
+            border-color: var(--accent-color);
         }
+
         button {
-            padding: 12px 30px;
-            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            padding: 10px 20px;
+            background: var(--accent-color);
             color: white;
             border: none;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
             font-weight: 600;
-            transition: transform 0.2s;
+            cursor: pointer;
+            transition: background 0.2s;
         }
+
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+            background: var(--accent-hover);
         }
+
+        /* Session List */
+        .session-list {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 8px;
+        }
+
+        .session-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .session-card:hover {
+            border-color: var(--accent-color);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .session-card.active {
+            border-color: var(--accent-color);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .session-id {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .session-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Events Table */
+        .table-container {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
         table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 8px;
-            margin-top: 10px;
+            border-collapse: collapse;
         }
+
         th {
             text-align: left;
-            padding: 15px;
-            color: #a0a0a0;
-            font-weight: 600;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        td {
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        td:first-child {
-            border-top-left-radius: 8px;
-            border-bottom-left-radius: 8px;
-            border-left: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        td:last-child {
-            border-top-right-radius: 8px;
-            border-bottom-right-radius: 8px;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .badge {
-            padding: 6px 12px;
-            border-radius: 20px;
+            padding: 12px 16px;
+            color: var(--text-secondary);
             font-size: 12px;
-            font-weight: 600;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
         }
-        .badge-danger { 
-            background: rgba(255, 107, 107, 0.2); 
-            color: #ff6b6b; 
-            border: 1px solid rgba(255, 107, 107, 0.3);
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
         }
-        .badge-warning { 
-            background: rgba(252, 163, 17, 0.2); 
-            color: #fca311; 
-            border: 1px solid rgba(252, 163, 17, 0.3);
+
+        tr:last-child td { border-bottom: none; }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
         }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Proctor Dashboard</h1>
-        <div class="input-group">
-            <input type="number" id="sessionId" placeholder="Enter Session ID to Monitor">
-            <button onclick="startMonitoring()">Monitor</button>
+    <div id="sidebar">
+        <div class="brand">Visil<span>Pro</span></div>
+        
+        <div class="nav-item active">
+            <span>Live Monitoring</span>
         </div>
+        <div class="nav-item">
+            <span>Exam History</span>
+        </div>
+        <div class="nav-item">
+            <span>Settings</span>
+        </div>
+    </div>
 
-        <div id="activeSessions" style="margin-bottom: 30px; background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
-            <h3 style="margin-top: 0; color: #4facfe;">Active Sessions</h3>
-            <div id="sessionList" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <p style="color: #aaa;">Loading sessions...</p>
+    <div id="main-content">
+        <div class="top-bar">
+            <div class="page-title">Proctor Dashboard</div>
+            <div class="user-profile">
+                <span>Admin Proctor</span>
+                <div style="width: 32px; height: 32px; background: var(--accent-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">AP</div>
             </div>
         </div>
-        
-        <table id="eventsTable">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Type</th>
-                    <th>Confidence</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Events will appear here -->
-            </tbody>
-        </table>
+
+        <div class="content-area">
+            <div class="dashboard-grid">
+                <!-- Left Panel: Active Sessions -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Active Sessions</span>
+                        <span class="badge badge-warning" id="activeCount">0 Active</span>
+                    </div>
+                    
+                    <div class="monitor-controls">
+                        <input type="text" id="sessionIdInput" placeholder="Enter Session ID">
+                        <button onclick="manualMonitor()">Go</button>
+                    </div>
+
+                    <div class="session-list" id="sessionList">
+                        <div style="text-align: center; color: var(--text-secondary); margin-top: 20px;">
+                            Loading sessions...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Live Events -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span id="monitoringTitle">Select a session to monitor</span>
+                        <button onclick="refreshEvents()" style="padding: 6px 12px; font-size: 12px; background: transparent; border: 1px solid var(--border-color);">Refresh</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="eventsTable">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Event Type</th>
+                                    <th>Confidence</th>
+                                    <th>Snapshot</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                                        No events to display
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        let currentSessionId = null;
         let monitoringInterval = null;
 
         // Fetch sessions on load
         fetchSessions();
-        setInterval(fetchSessions, 5000); // Refresh list every 5s
+        setInterval(fetchSessions, 5000);
 
         async function fetchSessions() {
             try {
                 const response = await fetch('/api/exam/sessions');
                 const sessions = await response.json();
                 const list = document.getElementById('sessionList');
-                list.innerHTML = '';
+                
+                document.getElementById('activeCount').innerText = `${sessions.length} Active`;
 
                 if (sessions.length === 0) {
-                    list.innerHTML = '<p style="color: #aaa;">No active sessions found.</p>';
+                    list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); margin-top: 20px;">No active sessions found.</div>';
                     return;
                 }
 
+                // Preserve current selection logic could go here, but for simplicity we rebuild
+                // Ideally we should diff, but innerHTML is fine for this PoC
+                list.innerHTML = '';
+
                 sessions.reverse().forEach(session => {
                     const card = document.createElement('div');
-                    card.style.padding = '10px 15px';
-                    card.style.background = 'rgba(255, 255, 255, 0.1)';
-                    card.style.borderRadius = '8px';
-                    card.style.cursor = 'pointer';
-                    card.style.border = '1px solid rgba(255, 255, 255, 0.1)';
-                    card.style.transition = 'all 0.2s';
-                    card.onmouseover = () => card.style.background = 'rgba(79, 172, 254, 0.2)';
-                    card.onmouseout = () => card.style.background = 'rgba(255, 255, 255, 0.1)';
-                    card.onclick = () => {
-                        document.getElementById('sessionId').value = session.id;
-                        startMonitoring();
-                    };
-
+                    card.className = `session-card ${currentSessionId == session.id ? 'active' : ''}`;
+                    card.onclick = () => selectSession(session.id);
+                    
                     card.innerHTML = `
-                        <div style="font-weight: bold; color: #fff;">Session #${session.id}</div>
-                        <div style="font-size: 12px; color: #ccc;">Student: ${session.studentId}</div>
-                        <div style="font-size: 12px; color: #4facfe;">${session.status}</div>
+                        <div class="session-id">Session #${session.id}</div>
+                        <div class="session-meta">
+                            <span>Student: ${session.studentId}</span>
+                            <span style="color: var(--success-color)">${session.status}</span>
+                        </div>
                     `;
                     list.appendChild(card);
                 });
@@ -190,14 +401,26 @@
             }
         }
 
-        function startMonitoring() {
-            const sessionId = document.getElementById('sessionId').value;
-            if (!sessionId) return alert("Please enter a Session ID");
+        function manualMonitor() {
+            const id = document.getElementById('sessionIdInput').value;
+            if (id) selectSession(id);
+        }
+
+        function selectSession(id) {
+            currentSessionId = id;
+            document.getElementById('monitoringTitle').innerText = `Monitoring Session #${id}`;
+            document.getElementById('sessionIdInput').value = id;
+            
+            // Highlight active card
+            fetchSessions(); // Re-render to update active class
 
             if (monitoringInterval) clearInterval(monitoringInterval);
-            
-            fetchEvents(sessionId);
-            monitoringInterval = setInterval(() => fetchEvents(sessionId), 2000);
+            fetchEvents(id);
+            monitoringInterval = setInterval(() => fetchEvents(id), 2000);
+        }
+
+        function refreshEvents() {
+            if (currentSessionId) fetchEvents(currentSessionId);
         }
 
         async function fetchEvents(sessionId) {
@@ -213,10 +436,21 @@
         function updateTable(events) {
             const tbody = document.querySelector('#eventsTable tbody');
             tbody.innerHTML = '';
+
+            if (events.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                            No malpractice events detected yet.
+                        </td>
+                    </tr>`;
+                return;
+            }
             
             events.reverse().forEach(event => {
                 const row = document.createElement('tr');
                 const time = new Date(event.timestamp).toLocaleTimeString();
+                
                 let badgeClass = 'badge-warning';
                 if (event.type === 'MULTIPLE_FACES' || event.type === 'FACE_NOT_VISIBLE') badgeClass = 'badge-danger';
 
@@ -224,7 +458,7 @@
                     <td>${time}</td>
                     <td><span class="badge ${badgeClass}">${event.type}</span></td>
                     <td>${(event.confidenceScore * 100).toFixed(0)}%</td>
-                    <td>${event.snapshotUrl}</td>
+                    <td style="color: var(--accent-color); font-size: 12px;">View Image</td>
                 `;
                 tbody.appendChild(row);
             });
