@@ -559,6 +559,9 @@
     </script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2"></script>
+    
+    <!-- LLM-powered proctoring -->
+    <script src="js/llm-proctoring.js"></script>
     <script>
         const video = document.getElementById('video');
         const videoContainer = document.getElementById('video-container');
@@ -580,6 +583,11 @@
                 examSessionId = session.id;
                 document.getElementById('displaySessionId').innerText = examSessionId;
                 console.log("Exam Session Started:", examSessionId);
+                
+                // Start LLM-powered proctoring
+                console.log("Starting LLM-powered proctoring...");
+                startLLMProctoring(examSessionId);
+                
             } catch (err) {
                 console.error("Failed to start session:", err);
             }

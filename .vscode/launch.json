@@ -1,0 +1,11 @@
+{
+    "type": "java",
+    "name": "VisilPro",
+    "request": "launch",
+    "mainClass": "com.visilpro.VisilProApplication",
+    "env": {
+        "GEMINI_REALTIME_MODEL": "gemini-1.5-pro",
+        "GEMINI_VISION_MODEL": "gemini-1.5-flash",
+        "GOOGLE_CLOUD_LOCATION": "us-east1"
+    }
+}

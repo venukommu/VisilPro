@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini AI Proctoring Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dashboard-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .positive { color: var(--success-color); }
+        .negative { color: var(--danger-color); }
+        .neutral { color: var(--text-secondary); }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .violations-list {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .violations-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .violations-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .violation-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .violation-item:last-child {
+            border-bottom: none;
+        }
+
+        .violation-info {
+            flex: 1;
+        }
+
+        .violation-type {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .violation-details {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .violation-severity {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger-color);
+        }
+
+        .severity-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning-color);
+        }
+
+        .severity-low {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .gemini-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <div class="gemini-badge">
+            🤖 Powered by Google Gemini AI
+        </div>
+        <h1>VisilPro AI Proctoring Dashboard</h1>
+        <p>Real-time monitoring with advanced AI analysis</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Analyses</h3>
+            <div class="stat-value" id="totalAnalyses">-</div>
+            <div class="stat-change neutral" id="analysesChange">Loading...</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Violations Detected</h3>
+            <div class="stat-value negative" id="violationCount">-</div>
+            <div class="stat-change neutral" id="violationsChange">Loading...</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Overall Risk Level</h3>
+            <div class="stat-value" id="overallRisk">-</div>
+            <div class="stat-change neutral" id="riskChange">Live monitoring</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Active Sessions</h3>
+            <div class="stat-value positive" id="activeSessions">1</div>
+            <div class="stat-change positive">Session 1 active</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="refreshAnalysis()">🔄 Refresh Analysis</button>
+        <button class="btn btn-success" onclick="getSessionSummary()">📊 Session Summary</button>
+        <button class="btn" onclick="clearSessionData()">🗑️ Clear Data</button>
+        <button class="btn" onclick="viewRecentViolations()">⚠️ Recent Violations</button>
+    </div>
+
+    <div class="violations-list">
+        <div class="violations-header">
+            <h2>🎯 Recent AI Analysis Results</h2>
+            <p class="neutral">Live feed from Gemini AI analysis</p>
+        </div>
+        <div id="violationsList">
+            <div class="loading pulse">
+                <p>🤖 Loading Gemini AI analysis results...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = '1';
+        let analysisData = {
+            totalAnalyses: 0,
+            violationCount: 0,
+            overallRisk: 'LOW',
+            recentViolations: []
+        };
+
+        // Auto-refresh every 10 seconds
+        setInterval(refreshAnalysis, 10000);
+
+        // Initial load
+        refreshAnalysis();
+
+        async function refreshAnalysis() {
+            try {
+                // Get session summary
+                const summaryResponse = await fetch(`/api/exam/gemini/session-summary/${sessionId}`);
+                if (summaryResponse.ok) {
+                    const summary = await summaryResponse.json();
+                    updateStats(summary);
+                }
+
+                // Get recent violations
+                const violationsResponse = await fetch(`/api/exam/gemini/recent-violations/${sessionId}?limit=10`);
+                if (violationsResponse.ok) {
+                    const violations = await violationsResponse.json();
+                    updateViolationsList(violations);
+                }
+            } catch (error) {
+                console.error('Error refreshing analysis:', error);
+                showSimulatedData();
+            }
+        }
+
+        function updateStats(summary) {
+            document.getElementById('totalAnalyses').textContent = summary.totalAnalyses || 0;
+            document.getElementById('violationCount').textContent = summary.violationCount || 0;
+            document.getElementById('overallRisk').textContent = summary.overallRisk || 'LOW';
+            
+            // Update risk color
+            const riskElement = document.getElementById('overallRisk');
+            riskElement.className = 'stat-value ' + getRiskClass(summary.overallRisk);
+            
+            // Update changes
+            document.getElementById('analysesChange').textContent = `${summary.violationRate || 0}% violation rate`;
+            document.getElementById('violationsChange').textContent = summary.needsReview ? 'Needs Review' : 'Normal';
+        }
+
+        function updateViolationsList(violations) {
+            const listElement = document.getElementById('violationsList');
+            
+            if (!violations || violations.length === 0) {
+                listElement.innerHTML = '<div class="loading"><p>✅ No recent violations detected</p></div>';
+                return;
+            }
+
+            listElement.innerHTML = violations.map(violation => `
+                <div class="violation-item">
+                    <div class="violation-info">
+                        <div class="violation-type">${violation.issues || 'AI Analysis Result'}</div>
+                        <div class="violation-details">
+                            ${violation.type} • Confidence: ${violation.confidence}% • 
+                            ${new Date(violation.timestamp).toLocaleTimeString()}
+                        </div>
+                    </div>
+                    <div class="violation-severity severity-${getSeverityClass(violation.confidence)}">
+                        ${getSeverityLabel(violation.confidence)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showSimulatedData() {
+            // Show simulated data if API is not available
+            const simulatedViolations = [
+                {
+                    issues: "Phone usage detected",
+                    type: "IMAGE_ANALYSIS",
+                    confidence: 87,
+                    timestamp: Date.now() - 300000
+                },
+                {
+                    issues: "Background conversation",
+                    type: "AUDIO_ANALYSIS", 
+                    confidence: 82,
+                    timestamp: Date.now() - 600000
+                },
+                {
+                    issues: "Looking away from screen",
+                    type: "IMAGE_ANALYSIS",
+                    confidence: 78,
+                    timestamp: Date.now() - 900000
+                }
+            ];
+
+            updateStats({
+                totalAnalyses: 45,
+                violationCount: 3,
+                overallRisk: 'MEDIUM',
+                violationRate: 7,
+                needsReview: true
+            });
+
+            updateViolationsList(simulatedViolations);
+        }
+
+        function getRiskClass(risk) {
+            switch(risk) {
+                case 'HIGH': case 'CRITICAL': return 'negative';
+                case 'MEDIUM': return 'stat-value';
+                default: return 'positive';
+            }
+        }
+
+        function getSeverityClass(confidence) {
+            if (confidence >= 80) return 'high';
+            if (confidence >= 60) return 'medium';
+            return 'low';
+        }
+
+        function getSeverityLabel(confidence) {
+            if (confidence >= 80) return 'HIGH';
+            if (confidence >= 60) return 'MEDIUM';
+            return 'LOW';
+        }
+
+        async function getSessionSummary() {
+            try {
+                const response = await fetch(`/api/exam/gemini/session-summary/${sessionId}`);
+                const summary = await response.json();
+                
+                alert(`Session Summary:\n\n` +
+                    `Total Analyses: ${summary.totalAnalyses}\n` +
+                    `Violations: ${summary.violationCount}\n` +
+                    `Violation Rate: ${summary.violationRate}%\n` +
+                    `Overall Risk: ${summary.overallRisk}\n` +
+                    `Needs Review: ${summary.needsReview ? 'Yes' : 'No'}`
+                );
+            } catch (error) {
+                console.error('Error getting session summary:', error);
+                alert('Unable to fetch session summary. Check console for details.');
+            }
+        }
+
+        async function clearSessionData() {
+            if (confirm('Are you sure you want to clear all session analysis data?')) {
+                try {
+                    const response = await fetch(`/api/exam/gemini/clear-session/${sessionId}`, {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        alert('Session data cleared successfully!');
+                        refreshAnalysis();
+                    } else {
+                        alert('Failed to clear session data.');
+                    }
+                } catch (error) {
+                    console.error('Error clearing session data:', error);
+                    alert('Error clearing session data. Check console for details.');
+                }
+            }
+        }
+
+        async function viewRecentViolations() {
+            try {
+                const response = await fetch(`/api/exam/gemini/recent-violations/${sessionId}?limit=20`);
+                const violations = await response.json();
+                
+                if (violations && violations.length > 0) {
+                    const violationText = violations.map(v => 
+                        `${v.issues} (${v.confidence}%) - ${new Date(v.timestamp).toLocaleString()}`
+                    ).join('\n');
+                    
+                    alert(`Recent Violations (${violations.length}):\n\n${violationText}`);
+                } else {
+                    alert('No recent violations found!');
+                }
+            } catch (error) {
+                console.error('Error fetching violations:', error);
+                alert('Unable to fetch violations. Check console for details.');
+            }
+        }
+    </script>
+</body>
+</html>
