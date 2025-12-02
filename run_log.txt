@@ -1,0 +1,118 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.fusesource.jansi.internal.JansiLoader in an unnamed module (file:/C:/Users/Venu/Documents/maven/apache-maven-3.9.6/lib/jansi-2.4.0.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/C:/Users/Venu/Documents/maven/apache-maven-3.9.6/lib/guava-32.0.1-jre.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.visilpro:vigilpro >------------------------
+[INFO] Building VigilPro 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.1.6:run (default-cli) > test-compile @ vigilpro >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ vigilpro ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 14 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ vigilpro ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ vigilpro ---
+[INFO] skip non existing resourceDirectory C:\Users\Venu\Documents\APRTGS\VisilPro\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ vigilpro ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< spring-boot:3.1.6:run (default-cli) < test-compile @ vigilpro <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.1.6:run (default-cli) @ vigilpro ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.1.6)
+
+2025-12-01T09:14:37.155+05:30  INFO 29236 --- [           main] com.visilpro.VisilProApplication         : Starting VisilProApplication using Java 25.0.1 with PID 29236 (C:\Users\Venu\Documents\APRTGS\VisilPro\target\classes started by Venu in C:\Users\Venu\Documents\APRTGS\VisilPro)
+2025-12-01T09:14:37.161+05:30  INFO 29236 --- [           main] com.visilpro.VisilProApplication         : No active profile set, falling back to 1 default profile: "default"
+2025-12-01T09:14:39.318+05:30  INFO 29236 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-01T09:14:39.697+05:30  INFO 29236 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 362 ms. Found 2 JPA repository interfaces.
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/C:/Users/Venu/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.16/tomcat-embed-core-10.1.16.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2025-12-01T09:14:41.247+05:30  INFO 29236 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2025-12-01T09:14:41.272+05:30  INFO 29236 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-12-01T09:14:41.273+05:30  INFO 29236 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2025-12-01T09:14:41.617+05:30  INFO 29236 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-12-01T09:14:41.619+05:30  INFO 29236 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4320 ms
+2025-12-01T09:14:41.838+05:30  INFO 29236 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-12-01T09:14:42.314+05:30  INFO 29236 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:vigilpro user=SA
+2025-12-01T09:14:42.319+05:30  INFO 29236 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-12-01T09:14:42.346+05:30  INFO 29236 --- [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:vigilpro'
+2025-12-01T09:14:42.690+05:30  INFO 29236 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-01T09:14:42.810+05:30  INFO 29236 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2025-12-01T09:14:42.814+05:30  INFO 29236 --- [           main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2025-12-01T09:14:43.347+05:30  INFO 29236 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-01T09:14:43.460+05:30  WARN 29236 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-12-01T09:14:45.376+05:30  INFO 29236 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-01T09:14:45.477+05:30  INFO 29236 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by io.netty.util.internal.PlatformDependent0$4 (file:/C:/Users/Venu/.m2/repository/io/netty/netty-common/4.1.101.Final/netty-common-4.1.101.Final.jar)
+WARNING: Please consider reporting this to the maintainers of class io.netty.util.internal.PlatformDependent0$4
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+2025-12-01T09:14:46.881+05:30  WARN 29236 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-01T09:14:46.920+05:30  WARN 29236 --- [           main] o.s.security.core.userdetails.User       : User.withDefaultPasswordEncoder() is considered unsafe for production and is only intended for sample applications.
+2025-12-01T09:14:47.144+05:30  WARN 29236 --- [           main] o.s.security.core.userdetails.User       : User.withDefaultPasswordEncoder() is considered unsafe for production and is only intended for sample applications.
+2025-12-01T09:14:47.532+05:30  INFO 29236 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@4ee80a94, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7afac89a, org.springframework.security.web.context.SecurityContextHolderFilter@31d8352e, org.springframework.security.web.header.HeaderWriterFilter@2f006edf, org.springframework.security.web.authentication.logout.LogoutFilter@3e8995cc, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@129b0ed, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1cb7f2fe, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4a76c90, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@76d220eb, org.springframework.security.web.access.ExceptionTranslationFilter@3d96b8fb, org.springframework.security.web.access.intercept.AuthorizationFilter@1b1d93e9]
+2025-12-01T09:14:47.963+05:30  INFO 29236 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2025-12-01T09:14:48.842+05:30  INFO 29236 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-12-01T09:14:49.061+05:30  INFO 29236 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2025-12-01T09:14:49.083+05:30  INFO 29236 --- [           main] com.visilpro.VisilProApplication         : Started VisilProApplication in 12.894 seconds (process running for 14.062)
+2025-12-01T09:16:30.415+05:30  INFO 29236 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-12-01T09:16:30.415+05:30  INFO 29236 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-12-01T09:16:30.422+05:30  INFO 29236 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 7 ms
+2025-12-01T09:17:17.748+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:17:17.760+05:30  WARN 29236 --- [onPool-worker-1] c.v.service.EnhancedProctoringService    : High-risk violation detected for session 1: Phone usage detected
+2025-12-01T09:17:32.688+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:17:44.793+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:17:47.693+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:18:02.701+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:18:06.751+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:18:17.688+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:18:17.702+05:30  WARN 29236 --- [onPool-worker-1] c.v.service.EnhancedProctoringService    : High-risk violation detected for session 1: Multiple faces detected
+2025-12-01T09:18:28.817+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:18:32.689+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:18:47.698+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:18:50.770+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:19:02.689+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:19:12.748+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:19:17.754+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:19:32.680+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:19:34.769+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:19:47.697+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:19:56.748+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:20:02.689+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:20:17.691+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:20:17.698+05:30  WARN 29236 --- [onPool-worker-1] c.v.service.EnhancedProctoringService    : High-risk violation detected for session 1: Phone usage detected
+2025-12-01T09:20:18.756+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:20:32.689+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:20:40.768+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:20:47.689+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:21:02.680+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:21:02.751+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:21:17.689+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+2025-12-01T09:21:24.750+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Audio analysis completed for proctoring
+2025-12-01T09:21:32.681+05:30  INFO 29236 --- [onPool-worker-1] com.visilpro.service.GeminiRESTService   : Image analysis completed for proctoring
+^C
