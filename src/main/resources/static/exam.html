@@ -773,24 +773,40 @@
             }
         });
 
+        // Visual Feedback for Malpractice
+        function triggerVisualAlert() {
+            videoContainer.classList.add('malpractice-detected');
+            setTimeout(() => {
+                videoContainer.classList.remove('malpractice-detected');
+            }, 3000);
+        }
+
         let lastAlertTime = 0;
         async function handleMalpractice(type, message) {
+            triggerVisualAlert();
+            
             const now = Date.now();
             if (now - lastAlertTime < 5000) return; // Debounce alerts (5 seconds)
 
             lastAlertTime = now;
             
-            // Alert Overlay removed as per request
-            // const alertBox = document.getElementById('malpracticeAlert');
-            // document.getElementById('alertMessage').innerText = message;
-            // alertBox.style.display = 'block';
-            // setTimeout(() => alertBox.style.display = 'none', 3000);
-
             // Add to persistent log
             const logList = document.getElementById('warningList');
             const entry = document.createElement('li');
             entry.innerText = `[${new Date().toLocaleTimeString()}] ${message}`;
             logList.prepend(entry);
+
+            // Capture Snapshot
+            let snapshotData = null;
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                snapshotData = canvas.toDataURL('image/jpeg', 0.7);
+            } catch (e) {
+                console.error("Snapshot capture failed:", e);
+            }
 
             // Log to Backend
             if (examSessionId) {
@@ -802,7 +818,7 @@
                             sessionId: examSessionId,
                             type: type,
                             confidenceScore: 0.95,
-                            snapshotUrl: "snapshot_placeholder.jpg" // In real app, send base64 image
+                            snapshotData: snapshotData
                         })
                     });
                     console.log("Malpractice logged:", type);
@@ -876,53 +892,6 @@
             // In a real app, you would submit the form data here
             window.location.href = 'index.html';
         }
-
-        // Visual Feedback for Malpractice
-        function triggerVisualAlert() {
-            videoContainer.classList.add('malpractice-detected');
-            setTimeout(() => {
-                videoContainer.classList.remove('malpractice-detected');
-            }, 3000);
-        }
-
-        // Update handleMalpractice to trigger visual alert
-        const originalHandleMalpractice = handleMalpractice;
-        handleMalpractice = async function(type, message) {
-            triggerVisualAlert();
-            // Call the original function logic (we need to duplicate it or refactor, 
-            // since I can't easily wrap the async function defined above without redefining it completely 
-            // or changing the previous definition. Let's redefine it for clarity in this edit).
-            
-            const now = Date.now();
-            if (now - lastAlertTime < 5000) return; // Debounce alerts (5 seconds)
-
-            lastAlertTime = now;
-            
-            // Add to persistent log
-            const logList = document.getElementById('warningList');
-            const entry = document.createElement('li');
-            entry.innerText = `[${new Date().toLocaleTimeString()}] ${message}`;
-            logList.prepend(entry);
-
-            // Log to Backend
-            if (examSessionId) {
-                try {
-                    await fetch('/api/exam/log', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            sessionId: examSessionId,
-                            type: type,
-                            confidenceScore: 0.95,
-                            snapshotUrl: "snapshot_placeholder.jpg"
-                        })
-                    });
-                    console.log("Malpractice logged:", type);
-                } catch (err) {
-                    console.error("Failed to log malpractice:", err);
-                }
-            }
-        };
     </script>
 </body>
 </html>
