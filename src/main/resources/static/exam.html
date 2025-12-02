@@ -774,6 +774,83 @@
             }, 2000);
         });
 
+        // WebRTC & WebSocket Setup
+        const signalingSocket = new WebSocket('ws://' + window.location.host + '/signal');
+        let peerConnection;
+        const config = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' } // Public STUN server
+            ]
+        };
+
+        signalingSocket.onopen = () => {
+            console.log("Connected to signaling server");
+        };
+
+        signalingSocket.onmessage = async (message) => {
+            const data = JSON.parse(message.data);
+            
+            if (data.type === 'offer') {
+                console.log("Received offer");
+                await createPeerConnection();
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                
+                signalingSocket.send(JSON.stringify({
+                    type: 'answer',
+                    answer: answer,
+                    sessionId: examSessionId
+                }));
+            } else if (data.type === 'candidate') {
+                if (peerConnection) {
+                    try {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    } catch (e) {
+                        console.error("Error adding received ice candidate", e);
+                    }
+                }
+            }
+        };
+
+        async function createPeerConnection() {
+            peerConnection = new RTCPeerConnection(config);
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    signalingSocket.send(JSON.stringify({
+                        type: 'candidate',
+                        candidate: event.candidate,
+                        sessionId: examSessionId
+                    }));
+                }
+            };
+
+            // Add local stream tracks to peer connection
+            const stream = video.srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, stream);
+                });
+            }
+        }
+
+        // Join the signaling room when the exam starts
+        const originalStartExamSession = startExamSession;
+        startExamSession = async function() {
+            await originalStartExamSession();
+            if (examSessionId) {
+                // Wait for socket to be open if it isn't already
+                if (signalingSocket.readyState === WebSocket.OPEN) {
+                    signalingSocket.send(JSON.stringify({ type: 'join', sessionId: examSessionId.toString() }));
+                } else {
+                    signalingSocket.addEventListener('open', () => {
+                        signalingSocket.send(JSON.stringify({ type: 'join', sessionId: examSessionId.toString() }));
+                    });
+                }
+            }
+        };
+
         // Tab Switching / Focus Lost Detection
         document.addEventListener("visibilitychange", () => {
             if (document.hidden && isExamActive) {
@@ -781,24 +858,40 @@
             }
         });
 
+        // Visual Feedback for Malpractice
+        function triggerVisualAlert() {
+            videoContainer.classList.add('malpractice-detected');
+            setTimeout(() => {
+                videoContainer.classList.remove('malpractice-detected');
+            }, 3000);
+        }
+
         let lastAlertTime = 0;
         async function handleMalpractice(type, message) {
+            triggerVisualAlert();
+            
             const now = Date.now();
             if (now - lastAlertTime < 5000) return; // Debounce alerts (5 seconds)
 
             lastAlertTime = now;
             
-            // Alert Overlay removed as per request
-            // const alertBox = document.getElementById('malpracticeAlert');
-            // document.getElementById('alertMessage').innerText = message;
-            // alertBox.style.display = 'block';
-            // setTimeout(() => alertBox.style.display = 'none', 3000);
-
             // Add to persistent log
             const logList = document.getElementById('warningList');
             const entry = document.createElement('li');
             entry.innerText = `[${new Date().toLocaleTimeString()}] ${message}`;
             logList.prepend(entry);
+
+            // Capture Snapshot
+            let snapshotData = null;
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                snapshotData = canvas.toDataURL('image/jpeg', 0.7);
+            } catch (e) {
+                console.error("Snapshot capture failed:", e);
+            }
 
             // Log to Backend
             if (examSessionId) {
@@ -810,7 +903,7 @@
                             sessionId: examSessionId,
                             type: type,
                             confidenceScore: 0.95,
-                            snapshotUrl: "snapshot_placeholder.jpg" // In real app, send base64 image
+                            snapshotData: snapshotData
                         })
                     });
                     console.log("Malpractice logged:", type);
@@ -884,53 +977,6 @@
             // In a real app, you would submit the form data here
             window.location.href = 'index.html';
         }
-
-        // Visual Feedback for Malpractice
-        function triggerVisualAlert() {
-            videoContainer.classList.add('malpractice-detected');
-            setTimeout(() => {
-                videoContainer.classList.remove('malpractice-detected');
-            }, 3000);
-        }
-
-        // Update handleMalpractice to trigger visual alert
-        const originalHandleMalpractice = handleMalpractice;
-        handleMalpractice = async function(type, message) {
-            triggerVisualAlert();
-            // Call the original function logic (we need to duplicate it or refactor, 
-            // since I can't easily wrap the async function defined above without redefining it completely 
-            // or changing the previous definition. Let's redefine it for clarity in this edit).
-            
-            const now = Date.now();
-            if (now - lastAlertTime < 5000) return; // Debounce alerts (5 seconds)
-
-            lastAlertTime = now;
-            
-            // Add to persistent log
-            const logList = document.getElementById('warningList');
-            const entry = document.createElement('li');
-            entry.innerText = `[${new Date().toLocaleTimeString()}] ${message}`;
-            logList.prepend(entry);
-
-            // Log to Backend
-            if (examSessionId) {
-                try {
-                    await fetch('/api/exam/log', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            sessionId: examSessionId,
-                            type: type,
-                            confidenceScore: 0.95,
-                            snapshotUrl: "snapshot_placeholder.jpg"
-                        })
-                    });
-                    console.log("Malpractice logged:", type);
-                } catch (err) {
-                    console.error("Failed to log malpractice:", err);
-                }
-            }
-        };
     </script>
 </body>
 </html>

@@ -314,9 +314,12 @@
     </div>
 
     <script>
+        // Remove client-side interception to allow Spring Security to handle authentication
+        
         function fakeGoogleLogin() {
+            // Fill in the student credentials defined in SecurityConfig
             document.getElementById('username').value = 'student@visilpro.com';
-            document.getElementById('password').value = 'password';
+            document.getElementById('password').value = 'asdf@IMN213';
             document.getElementById('loginForm').submit();
         }
     </script>

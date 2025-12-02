@@ -23,6 +23,9 @@ public class MalpracticeEvent {
     private String severity; // LOW, MEDIUM, HIGH, CRITICAL
     private String analysisType; // IMAGE_ANALYSIS, AUDIO_ANALYSIS, MULTIMODAL_ANALYSIS
 
+    @Transient
+    private String snapshotData; // Base64 encoded image data (not saved to DB)
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getSessionId() { return sessionId; }
@@ -48,4 +51,6 @@ public class MalpracticeEvent {
     
     public String getAnalysisType() { return analysisType; }
     public void setAnalysisType(String analysisType) { this.analysisType = analysisType; }
+    public String getSnapshotData() { return snapshotData; }
+    public void setSnapshotData(String snapshotData) { this.snapshotData = snapshotData; }
 }
