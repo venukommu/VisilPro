@@ -25,6 +25,7 @@ public class SecurityConfig {
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/js/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/models/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/images/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/exam/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/favicon.ico")
                 ).permitAll()
                 .anyRequest().authenticated()

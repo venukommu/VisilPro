@@ -17,6 +17,9 @@ public class MalpracticeEvent {
     private double confidenceScore;
     private String snapshotUrl; // Path to saved image evidence
 
+    @Transient
+    private String snapshotData; // Base64 encoded image data (not saved to DB)
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getSessionId() { return sessionId; }
@@ -29,4 +32,6 @@ public class MalpracticeEvent {
     public void setConfidenceScore(double confidenceScore) { this.confidenceScore = confidenceScore; }
     public String getSnapshotUrl() { return snapshotUrl; }
     public void setSnapshotUrl(String snapshotUrl) { this.snapshotUrl = snapshotUrl; }
+    public String getSnapshotData() { return snapshotData; }
+    public void setSnapshotData(String snapshotData) { this.snapshotData = snapshotData; }
 }

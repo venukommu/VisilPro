@@ -119,7 +119,7 @@
         /* Dashboard Components */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 350px 1fr;
+            grid-template-columns: 300px 1fr 350px;
             gap: 24px;
             height: 100%;
         }
@@ -326,7 +326,7 @@
                     </div>
                 </div>
 
-                <!-- Right Panel: Live Events -->
+                <!-- Middle Panel: Live Events -->
                 <div class="panel">
                     <div class="panel-header">
                         <span id="monitoringTitle">Select a session to monitor</span>
@@ -351,6 +351,58 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Live Feeds (CCTV & Student) -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Live Feeds</span>
+                        <div style="display: flex; gap: 8px;">
+                            <span class="badge badge-danger" style="display: flex; align-items: center; gap: 4px;"><div style="width: 6px; height: 6px; background: white; border-radius: 50%;"></div> LIVE</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 16px; overflow-y: auto;">
+                        <!-- Student Feed Placeholder -->
+                        <div style="background: black; border-radius: 8px; overflow: hidden; position: relative; aspect-ratio: 4/3;">
+                            <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 600;">STUDENT CAM</div>
+                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b; font-size: 12px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 24px; margin-bottom: 8px;">👤</div>
+                                    Waiting for stream...
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CCTV Feed Mock -->
+                        <div style="background: #0f172a; border-radius: 8px; overflow: hidden; position: relative; aspect-ratio: 16/9; border: 1px solid var(--border-color);">
+                            <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; color: var(--accent-color);">CCTV - HALL A</div>
+                            <div style="position: absolute; bottom: 8px; right: 8px; font-family: monospace; font-size: 10px; color: rgba(255,255,255,0.7);">CAM-01 | REC</div>
+                            
+                            <!-- Simulated CCTV Content (CSS Animation) -->
+                            <div class="cctv-content" style="width: 100%; height: 100%; background: linear-gradient(45deg, #1e293b 25%, #0f172a 25%, #0f172a 50%, #1e293b 50%, #1e293b 75%, #0f172a 75%, #0f172a 100%); background-size: 20px 20px; opacity: 0.3;"></div>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 4px;">📹</div>
+                                <div style="font-size: 10px; color: var(--text-secondary);">Room Monitoring Active</div>
+                            </div>
+                        </div>
+
+                        <div style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 12px;">
+                            <div style="margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">DEVICE STATUS</div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span>Student Cam</span>
+                                <span style="color: var(--success-color);">Online</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span>Microphone</span>
+                                <span style="color: var(--success-color);">Active</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Hall CCTV</span>
+                                <span style="color: var(--success-color);">Connected</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -454,11 +506,16 @@
                 let badgeClass = 'badge-warning';
                 if (event.type === 'MULTIPLE_FACES' || event.type === 'FACE_NOT_VISIBLE') badgeClass = 'badge-danger';
 
+                let evidenceCell = '<span style="color: var(--text-secondary); font-size: 12px;">No Image</span>';
+                if (event.snapshotUrl) {
+                    evidenceCell = `<a href="${event.snapshotUrl}" target="_blank" style="color: var(--accent-color); font-size: 12px; text-decoration: none; font-weight: 500;">View Image ↗</a>`;
+                }
+
                 row.innerHTML = `
                     <td>${time}</td>
                     <td><span class="badge ${badgeClass}">${event.type}</span></td>
                     <td>${(event.confidenceScore * 100).toFixed(0)}%</td>
-                    <td style="color: var(--accent-color); font-size: 12px;">View Image</td>
+                    <td>${evidenceCell}</td>
                 `;
                 tbody.appendChild(row);
             });
