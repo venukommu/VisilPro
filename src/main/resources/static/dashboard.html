@@ -44,23 +44,60 @@
             flex-direction: column;
             padding: 24px;
             flex-shrink: 0;
+            transition: width 0.3s ease;
+        }
+
+        #sidebar.collapsed {
+            width: 80px;
+            padding: 24px 12px;
         }
 
         .brand {
-            font-size: 24px;
+            font-size: 32px;
             font-weight: 800;
             margin-bottom: 40px;
             color: var(--text-primary);
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
+            justify-content: space-between;
+            height: 40px;
+            overflow: hidden;
+            letter-spacing: -1px;
         }
 
-        .brand span { color: var(--accent-color); }
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            white-space: nowrap;
+        }
+
+        .brand span { color: #2575fc; }
+
+        #sidebar.collapsed .brand-text { display: none; }
+        #sidebar.collapsed .toggle-btn { margin: 0 auto; }
+        #sidebar.collapsed .brand { justify-content: center; }
+        #sidebar.collapsed .brand-logo { display: none; }
+
+        .toggle-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        
+        .toggle-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+        }
 
         .nav-item {
-            padding: 12px 16px;
+            padding: 12px;
             border-radius: 8px;
             color: var(--text-secondary);
             cursor: pointer;
@@ -70,6 +107,16 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        #sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+
+        #sidebar.collapsed .nav-text {
+            display: none;
         }
 
         .nav-item:hover, .nav-item.active {
@@ -283,16 +330,24 @@
 </head>
 <body>
     <div id="sidebar">
-        <div class="brand">Visil<span>Pro</span></div>
+        <div class="brand">
+            <div class="brand-logo">Visil<span>Pro</span></div>
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </div>
         
-        <div class="nav-item active">
-            <span>Live Monitoring</span>
+        <div class="nav-item active" title="Live Monitoring">
+            <div style="font-size: 20px;">📹</div>
+            <span class="nav-text">Live Monitoring</span>
         </div>
-        <div class="nav-item">
-            <span>Exam History</span>
+        <div class="nav-item" title="Exam History">
+            <div style="font-size: 20px;">📜</div>
+            <span class="nav-text">Exam History</span>
         </div>
-        <div class="nav-item">
-            <span>Settings</span>
+        <div class="nav-item" title="Settings">
+            <div style="font-size: 20px;">⚙️</div>
+            <span class="nav-text">Settings</span>
         </div>
     </div>
 
@@ -413,6 +468,11 @@
     </div>
 
     <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
         let currentSessionId = null;
         let monitoringInterval = null;
 
