@@ -364,10 +364,13 @@
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 16px; overflow-y: auto;">
-                        <!-- Student Feed Placeholder -->
+                        <!-- Student Feed -->
                         <div style="background: black; border-radius: 8px; overflow: hidden; position: relative; aspect-ratio: 4/3;">
-                            <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 600;">STUDENT CAM</div>
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b; font-size: 12px;">
+                            <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; z-index: 10;">STUDENT CAM</div>
+                            
+                            <video id="studentVideo" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; display: none;"></video>
+                            
+                            <div id="studentVideoPlaceholder" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b; font-size: 12px;">
                                 <div style="text-align: center;">
                                     <div style="font-size: 24px; margin-bottom: 8px;">👤</div>
                                     Waiting for stream...
@@ -469,6 +472,89 @@
             if (monitoringInterval) clearInterval(monitoringInterval);
             fetchEvents(id);
             monitoringInterval = setInterval(() => fetchEvents(id), 2000);
+
+            // WebRTC: Initiate Connection
+            startMonitoring(id);
+        }
+
+        // WebRTC Setup
+        const signalingSocket = new WebSocket('ws://' + window.location.host + '/signal');
+        let peerConnection;
+        const config = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' }
+            ]
+        };
+
+        signalingSocket.onopen = () => {
+            console.log("Connected to signaling server");
+        };
+
+        signalingSocket.onmessage = async (message) => {
+            const data = JSON.parse(message.data);
+
+            if (data.type === 'answer') {
+                console.log("Received answer");
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+            } else if (data.type === 'candidate') {
+                if (peerConnection) {
+                    try {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    } catch (e) {
+                        console.error("Error adding received ice candidate", e);
+                    }
+                }
+            }
+        };
+
+        async function startMonitoring(sessionId) {
+            // Join the room
+            if (signalingSocket.readyState === WebSocket.OPEN) {
+                signalingSocket.send(JSON.stringify({ type: 'join', sessionId: sessionId.toString() }));
+            } else {
+                // Wait/Retry logic could go here, but for now assume open
+                console.warn("Socket not open yet");
+                return;
+            }
+
+            if (peerConnection) peerConnection.close();
+
+            peerConnection = new RTCPeerConnection(config);
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    signalingSocket.send(JSON.stringify({
+                        type: 'candidate',
+                        candidate: event.candidate,
+                        sessionId: sessionId.toString()
+                    }));
+                }
+            };
+
+            peerConnection.ontrack = (event) => {
+                console.log("Received remote stream");
+                const remoteVideo = document.getElementById('studentVideo');
+                if (remoteVideo) {
+                    remoteVideo.srcObject = event.streams[0];
+                    // Hide placeholder
+                    document.getElementById('studentVideoPlaceholder').style.display = 'none';
+                    remoteVideo.style.display = 'block';
+                }
+            };
+
+            // Create Offer
+            // We need to add a transceiver to receive video even if we don't send any
+            peerConnection.addTransceiver('video', { direction: 'recvonly' });
+            peerConnection.addTransceiver('audio', { direction: 'recvonly' });
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+
+            signalingSocket.send(JSON.stringify({
+                type: 'offer',
+                offer: offer,
+                sessionId: sessionId.toString()
+            }));
         }
 
         function refreshEvents() {

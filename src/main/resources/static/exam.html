@@ -766,6 +766,83 @@
             }, 2000);
         });
 
+        // WebRTC & WebSocket Setup
+        const signalingSocket = new WebSocket('ws://' + window.location.host + '/signal');
+        let peerConnection;
+        const config = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' } // Public STUN server
+            ]
+        };
+
+        signalingSocket.onopen = () => {
+            console.log("Connected to signaling server");
+        };
+
+        signalingSocket.onmessage = async (message) => {
+            const data = JSON.parse(message.data);
+            
+            if (data.type === 'offer') {
+                console.log("Received offer");
+                await createPeerConnection();
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                
+                signalingSocket.send(JSON.stringify({
+                    type: 'answer',
+                    answer: answer,
+                    sessionId: examSessionId
+                }));
+            } else if (data.type === 'candidate') {
+                if (peerConnection) {
+                    try {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    } catch (e) {
+                        console.error("Error adding received ice candidate", e);
+                    }
+                }
+            }
+        };
+
+        async function createPeerConnection() {
+            peerConnection = new RTCPeerConnection(config);
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    signalingSocket.send(JSON.stringify({
+                        type: 'candidate',
+                        candidate: event.candidate,
+                        sessionId: examSessionId
+                    }));
+                }
+            };
+
+            // Add local stream tracks to peer connection
+            const stream = video.srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, stream);
+                });
+            }
+        }
+
+        // Join the signaling room when the exam starts
+        const originalStartExamSession = startExamSession;
+        startExamSession = async function() {
+            await originalStartExamSession();
+            if (examSessionId) {
+                // Wait for socket to be open if it isn't already
+                if (signalingSocket.readyState === WebSocket.OPEN) {
+                    signalingSocket.send(JSON.stringify({ type: 'join', sessionId: examSessionId.toString() }));
+                } else {
+                    signalingSocket.addEventListener('open', () => {
+                        signalingSocket.send(JSON.stringify({ type: 'join', sessionId: examSessionId.toString() }));
+                    });
+                }
+            }
+        };
+
         // Tab Switching / Focus Lost Detection
         document.addEventListener("visibilitychange", () => {
             if (document.hidden && isExamActive) {
