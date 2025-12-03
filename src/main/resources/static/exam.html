@@ -550,15 +550,15 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/face-api.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <script>
         // Expose face-api's tf for coco-ssd to avoid version conflicts
-        // if (typeof faceapi !== 'undefined' && faceapi.tf) {
-        //     window.tf = faceapi.tf;
-        //     console.log("Aliased faceapi.tf to window.tf");
-        // }
+        if (typeof faceapi !== 'undefined' && faceapi.tf) {
+            window.tf = faceapi.tf;
+            console.log("Aliased faceapi.tf to window.tf");
+        }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2"></script>
     
     <!-- LLM-powered proctoring -->
